@@ -17,16 +17,17 @@ export default function DashboardHeader() {
     <div className="w-full bg-white border-b border-gray-100">
       <div className="max-w-350 mx-auto px-6 py-4 flex items-center gap-4">
         {/* Logo */}
-       
-            {/* Logo */}
-                <div className="flex justify-start mb-6">
-                  <Image
-                    src="/images/logo/digilife-logo.png"
-                    alt="DigiLife – Smart Inventory Solutions"
-                    width={300}
-                    height={72}
-                    priority
-                  /> </div>
+
+        {/* Logo */}
+        <div className="flex justify-start mb-6">
+          <Image
+            src="/images/logo/digilife-logo.png"
+            alt="DigiLife – Smart Inventory Solutions"
+            width={300}
+            height={72}
+            priority
+          />{" "}
+        </div>
 
         {/* Tabs */}
         <div className="hidden lg:flex items-center gap-2 ml-3">

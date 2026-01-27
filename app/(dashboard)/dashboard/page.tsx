@@ -5,68 +5,64 @@ import SimpleBarChart from "@/components/dashboard/SimpleBarChart";
 import SimpleDonutChart from "@/components/dashboard/SimpleDonutChart";
 import ProgressDepartmentList from "@/components/dashboard/ProgressDepartmentList";
 import TopVendors from "@/components/dashboard/TopVendors";
+
+import { DASHBOARD_KPI_STATS } from "@/lib/demo-dashboard";
+
 import { getSessionUser } from "@/lib/session";
+
+function formatTodayDate() {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good Morning";
+  if (hour < 17) return "Good Afternoon";
+  return "Good Evening";
+}
 
 export default async function Page() {
   const user = await getSessionUser();
   const displayName = user?.name ?? "User";
 
-  const stats = [
-    {
-      title: "Total Requisitions",
-      value: "1,248",
-      sub: "244 more than last month",
-      badge: "+13%",
-    },
-    {
-      title: "Pending Approvals",
-      value: "486",
-      sub: "12% of total requisitions",
-      badge: "IT: 18 | Fin: 19",
-    },
-    {
-      title: "Active Purchase Orders",
-      value: "24",
-      sub: "22% of purchase orders are WIP",
-      badge: "6 delivering today",
-      },
-    {
-      title: "Inventory Value",
-      value: "৳ 8.4M",
-      sub: "৳ 1.2M increase from last month",
-      badge: "+13%",
-    },
-  ];
+  const greeting = getGreeting();
+  const today = formatTodayDate();
 
   return (
     <div>
       {/* Greeting */}
       <div className="mt-2">
         <h1 className="text-3xl font-semibold text-gray-900">
-          Good Morning, {displayName}
+          {greeting}, {displayName}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Today: Monday 12, February 2025
-        </p>
+        <p className="text-sm text-gray-500 mt-1">Today: {today}</p>
       </div>
 
       {/* KPI Cards */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map((s) => (
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 bg-[#F8F8F8] px-1 py-1 rounded-2xl">
+        {DASHBOARD_KPI_STATS.map((s) => (
           <StatCard
             key={s.title}
             title={s.title}
             value={s.value}
             badge={s.badge}
             sub={s.sub}
+            iconPath={s.iconPath}
           />
         ))}
       </div>
 
+      {/* Asset Summary */}
       <div className="mt-6">
         <AssetSummaryRow />
       </div>
 
+      {/* Middle Row */}
       <div className="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6">
         <SectionCard
           title="Requisitions by Department"
@@ -80,8 +76,12 @@ export default async function Page() {
         </SectionCard>
       </div>
 
+      {/* Bottom Row */}
       <div className="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <SectionCard title="Monthly Purchase Cost" rightSlot={<MonthDropdown />}>
+        <SectionCard
+          title="Monthly Purchase Cost"
+          rightSlot={<MonthDropdown />}
+        >
           <SimpleBarChart variant="purchase" />
         </SectionCard>
 
@@ -93,8 +93,12 @@ export default async function Page() {
         </SectionCard>
       </div>
 
+      {/* Final Row */}
       <div className="mt-6 grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <SectionCard title="Inventory by Category" rightSlot={<DateRangePills />}>
+        <SectionCard
+          title="Inventory by Category"
+          rightSlot={<DateRangePills />}
+        >
           <InventoryCategoryMock />
         </SectionCard>
 
@@ -106,8 +110,7 @@ export default async function Page() {
   );
 }
 
-/* ✅ small controls */
-
+/* controls */
 function MonthDropdown() {
   return (
     <select className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none">
@@ -122,16 +125,10 @@ function MonthDropdown() {
 function DateRangePills() {
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
-      >
+      <button className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
         From
       </button>
-      <button
-        type="button"
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
-      >
+      <button className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700">
         To
       </button>
     </div>
@@ -161,12 +158,6 @@ function InventoryCategoryMock() {
           <div className="w-12 text-sm text-gray-500 text-right">{x.pct}%</div>
         </div>
       ))}
-
-      <div className="mt-6 flex gap-3">
-        <div className="h-10 flex-1 rounded-xl bg-blue-600" />
-        <div className="h-10 flex-1 rounded-xl bg-blue-300" />
-        <div className="h-10 flex-1 rounded-xl bg-orange-400" />
-      </div>
     </div>
   );
 }
