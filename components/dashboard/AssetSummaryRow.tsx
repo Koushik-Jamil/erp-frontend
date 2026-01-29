@@ -1,11 +1,23 @@
+"use client";
+
+import { useRef } from "react";
 import * as Icons from "lucide-react";
-import { DEMO_ASSET_ITEMS, iconMap } from "@/lib/demo-assets";
+import { DEMO_ASSET_ITEMS, type AssetItem } from "@/lib/demo-assets";
 
 export default function AssetSummaryRow() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (offset: number) => {
+    scrollRef.current?.scrollBy({
+      left: offset,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <div className="rounded-2xl border border-gray-100 p-5 shadow-sm bg-[#F8F8F8]">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">
           Total Asset Summary
         </h2>
@@ -15,44 +27,47 @@ export default function AssetSummaryRow() {
         </button>
       </div>
 
-      {/* Horizontal scroll */}
-      <div
-        className="
-          mt-5 flex gap-4 overflow-x-auto pb-3
-          [-ms-overflow-style:none]
-          [scrollbar-width:none]
-          [&::-webkit-scrollbar]:hidden
-        "
-      >
-        {DEMO_ASSET_ITEMS.map((x, idx) => {
-          const IconComponent = Icons[iconMap[x.icon] as keyof typeof Icons] as React.ComponentType<{ size: number }>;
+      {/* Scrollable Row with Arrows */}
+      <div className="relative mt-5">
+        <button
+          onClick={() => scroll(-420)}
+          className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-[#0088ffec] border shadow p-2"
+        >
+          <Icons.ChevronLeft size={18} />
+        </button>
 
-          return (
-            <div
-              key={`${x.key}-${idx}`}
-              className="
-                shrink-0
-                rounded-2xl border border-gray-100 bg-white p-4
-                min-w-42.5
-              "
-            >
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-blue-50 p-2 text-blue-600">
-                  {IconComponent && <IconComponent size={20} />}
-                </div>
+        <button
+          onClick={() => scroll(420)}
+          className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-[#0088ffe8] border shadow p-2"
+        >
+          <Icons.ChevronRight size={18} />
+        </button>
 
-                <div>
-                  <div className="text-xl font-semibold text-gray-900">
-                    {x.value}
+        <div ref={scrollRef} className="flex gap-4 overflow-hidden px-10">
+          {DEMO_ASSET_ITEMS.map((x: AssetItem, idx: number) => {
+            const IconComponent = Icons[x.iconKey] as React.ComponentType<{ size: number }>;
+
+            return (
+              <div
+                key={`${x.key}-${idx}`}
+                className="min-w-45 shrink-0 rounded-2xl border border-gray-100 bg-white p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="rounded-xl bg-blue-50 p-2 text-blue-600">
+                    {IconComponent && <IconComponent size={20} />}
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {x.label}
+
+                  <div>
+                    <div className="text-xl font-semibold text-gray-900">
+                      {x.value}
+                    </div>
+                    <div className="text-xs text-gray-500">{x.label}</div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

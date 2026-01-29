@@ -51,6 +51,26 @@ export const sidebar_routes: SidebarRouteItem[] = [
     icon: LayoutDashboard,
     permission: ["VIEW_DASHBOARD"],
   },
+  {
+    name: "TICKETS",
+    icon: PackagePlus,
+    permission: [
+    ],
+    subItems: [
+      {
+        name: "All Tickets",
+        href: "/tickets/all-tickets",
+        icon: PackagePlus,
+        permission: [],
+      },
+      {
+        name: "My Tickets",
+        href: "/tickets/my-tickets",
+        icon: FileText,
+        permission: [],
+      },
+    ],
+  },
 
   {
     name: "Product",

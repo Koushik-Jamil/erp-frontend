@@ -2,9 +2,13 @@ import StatCard from "@/components/dashboard/StatCard";
 import SectionCard from "@/components/dashboard/SectionCard";
 import AssetSummaryRow from "@/components/dashboard/AssetSummaryRow";
 import SimpleBarChart from "@/components/dashboard/SimpleBarChart";
-import SimpleDonutChart from "@/components/dashboard/SimpleDonutChart";
+//import SimpleDonutChart from "@/components/dashboard/SimpleDonutChart";
 import ProgressDepartmentList from "@/components/dashboard/ProgressDepartmentList";
 import TopVendors from "@/components/dashboard/TopVendors";
+import RequisitionStatusDonut from "@/components/dashboard/RequisitionStatusDonut";
+
+import InventoryInOutChart from "@/components/dashboard/InventoryInOutChart";
+import InventoryByCategory from "@/components/dashboard/InventoryByCategory";
 
 import { DASHBOARD_KPI_STATS } from "@/lib/demo-dashboard";
 
@@ -44,17 +48,20 @@ export default async function Page() {
       </div>
 
       {/* KPI Cards */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 bg-[#F8F8F8] px-1 py-1 rounded-2xl">
-        {DASHBOARD_KPI_STATS.map((s) => (
-          <StatCard
-            key={s.title}
-            title={s.title}
-            value={s.value}
-            badge={s.badge}
-            sub={s.sub}
-            iconPath={s.iconPath}
-          />
-        ))}
+      <div className="mt-6 bg-[#F8F8F8] px-1 py-1 rounded-2xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
+          {DASHBOARD_KPI_STATS.map((s, i) => (
+            <StatCard
+              key={s.title}
+              title={s.title}
+              value={s.value}
+              badge={s.badge}
+              sub={s.sub}
+              iconPath={s.iconPath}
+              showDivider={i !== DASHBOARD_KPI_STATS.length - 1}
+            />
+          ))}
+        </div>
       </div>
 
       {/* Asset Summary */}
@@ -72,7 +79,7 @@ export default async function Page() {
         </SectionCard>
 
         <SectionCard title="Inventory In vs Out" rightSlot={<MonthDropdown />}>
-          <SimpleBarChart />
+          <InventoryInOutChart />
         </SectionCard>
       </div>
 
@@ -89,7 +96,7 @@ export default async function Page() {
           title="Requisitions Status Overview"
           rightSlot={<MonthDropdown />}
         >
-          <SimpleDonutChart />
+          <RequisitionStatusDonut />
         </SectionCard>
       </div>
 
@@ -99,12 +106,12 @@ export default async function Page() {
           title="Inventory by Category"
           rightSlot={<DateRangePills />}
         >
-          <InventoryCategoryMock />
+          <InventoryByCategory />
         </SectionCard>
 
-        <SectionCard title="Top 3 Vendor" rightSlot={<DateRangePills />}>
-          <TopVendors />
-        </SectionCard>
+<SectionCard title="Top 3 Vendor" rightSlot={<DateRangePills />}>
+  <TopVendors />
+</SectionCard>
       </div>
     </div>
   );

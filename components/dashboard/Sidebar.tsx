@@ -87,7 +87,7 @@ export default function Sidebar() {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
 
-      // ✅ redirect to login + refresh to clear server UI state
+      // redirect to login + refresh to clear server UI state
       router.push("/login");
       router.refresh();
     } catch {
@@ -96,7 +96,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="bg-[#F8F8F8] px-4 pt-4 mt-6 ml-4 rounded-2xl shadow-sm">
+    <div className="bg-[#F8F8F8] px-2 pt-4 mt-6 ml-4 rounded-2xl shadow-sm">
       <aside
         className={[
           "hidden lg:flex flex-col min-h-screen bg-white border-r border-gray-100",

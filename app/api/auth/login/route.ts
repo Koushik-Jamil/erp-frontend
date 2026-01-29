@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const username = String(body?.username ?? "").trim();
     const password = String(body?.password ?? "");
 
-    // ✅ Basic validation
+    //  Basic validation
     if (!username || !password) {
       return NextResponse.json(
         { message: "Username and password are required." },
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Find user (demo user list)
+    //  Find user (demo user list)
     const user = DEMO_USERS.find(
       (u) => u.username === username && u.password === password
     );
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     }
 
     /**
-     * ✅ Session payload (ERP-friendly)
+     * Session payload (ERP-friendly)
      * Add more fields later:
      * - avatarUrl
      * - departmentId
@@ -53,14 +53,14 @@ export async function POST(req: Request) {
       { status: 200 }
     );
 
-    // ✅ Cookie expiry (ERP standard)
+    // Cookie expiry (ERP standard)
     // 1 day = 60 * 60 * 24
     res.cookies.set("dl_session", JSON.stringify(sessionPayload), {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24, // ✅ 1 day session
+      maxAge: 60 * 60 * 24, // 1 day session
     });
 
     return res;
