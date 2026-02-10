@@ -1,26 +1,21 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-// function getTitleFromPath(pathname: string) {
-//   if (pathname.startsWith("/assets")) return "Assets";
-//   if (pathname.startsWith("/requisitions")) return "Requisitions";
-//   if (pathname.startsWith("/purchase-order")) return "Purchase Order";
-//   if (pathname.startsWith("/vendors")) return "Vendors";
-//   if (pathname.startsWith("/invoice")) return "Invoice";
-//   if (pathname.startsWith("/employees")) return "Employees";
-//   return "Dashboard";
-// }
+import { resolvePageTitle } from "@/lib/page-titles";
 
 export default function Topbar() {
-  // const pathname = usePathname();
-  // const title = getTitleFromPath(pathname);
+  const pathname = usePathname();
+  const title = resolvePageTitle(pathname);
 
   return (
     <header className="sticky top-0 z-30 bg-[#F8F8F8] rounded-2xl backdrop-blur border-b border-gray-100">
       <div className="max-w-350 mx-auto px-6 py-4 flex items-center gap-4">
-        <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
+        {/* Dynamic Title */}
+        <h1 className="text-lg font-semibold text-gray-900">
+          {title}
+        </h1>
 
         {/* Search */}
         <div className="ml-auto hidden md:flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2">
@@ -36,8 +31,12 @@ export default function Topbar() {
           🔔
         </button>
 
-        {/* Avatar */}
-        <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-white">
+        {/* Avatar → Profile */}
+        <Link
+          href="/profile/me"
+          className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 bg-white cursor-pointer"
+          title="My Profile"
+        >
           <Image
             src="/images/login/login-panel.png"
             alt="User"
@@ -45,7 +44,7 @@ export default function Topbar() {
             height={40}
             className="object-cover"
           />
-        </div>
+        </Link>
       </div>
     </header>
   );

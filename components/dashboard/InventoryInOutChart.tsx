@@ -2,10 +2,35 @@
 
 import { DEMO_INVENTORY_IN_OUT } from "@/lib/demo-inventory";
 
-const MAX_VALUE = 700; // top grid line like design
-const BAR_MAX_HEIGHT = 180;
+function pickStep(maxVal: number) {
+  if (maxVal <= 200) return 50;
+  if (maxVal <= 500) return 100;
+  if (maxVal <= 1000) return 200;
+  if (maxVal <= 2000) return 500;
+  return 1000;
+}
+
+function buildScale(values: number[]) {
+  const rawMax = Math.max(...values, 0);
+  const step = pickStep(rawMax);
+  const maxTick = Math.ceil(rawMax / step) * step || step;
+
+  const ticks: number[] = [];
+  for (let v = 0; v <= maxTick; v += step) ticks.push(v);
+
+  return { maxTick, ticks };
+}
 
 export default function InventoryInOutChart() {
+  const BAR_MAX_HEIGHT = 180;
+  const CHART_TOTAL_HEIGHT = 270;
+
+  const allValues = DEMO_INVENTORY_IN_OUT.flatMap((d) => [d.stockIn, d.stockOut]);
+  const { maxTick, ticks } = buildScale(allValues);
+
+  const heightPx = (v: number) =>
+    maxTick ? Math.max(2, (v / maxTick) * BAR_MAX_HEIGHT) : 2;
+
   return (
     <div>
       {/* Legend */}
@@ -20,56 +45,73 @@ export default function InventoryInOutChart() {
         </span>
       </div>
 
-      {/* Chart */}
-      <div className="relative h-[240px]">
-        {/* Horizontal grid lines */}
-        {[0, 100, 200, 300, 400, 500, 600, 700].map((v) => (
-          <div
-            key={v}
-            className="absolute left-0 right-0 border-t border-dashed border-gray-200 text-xs text-gray-300"
-            style={{
-              bottom: `${(v / MAX_VALUE) * BAR_MAX_HEIGHT}px`,
-            }}
-          >
-            <span className="absolute -left-6 -top-2">{v}</span>
-          </div>
-        ))}
-
-        {/* Bars */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4">
-          {DEMO_INVENTORY_IN_OUT.map((item) => (
+      {/* Two-column chart: fixed Y + scrollable bars */}
+      <div className="flex" style={{ height: CHART_TOTAL_HEIGHT }}>
+        {/* Y Axis (no overflow) */}
+        <div className="relative w-14 shrink-0" style={{ height: BAR_MAX_HEIGHT }}>
+          {ticks.map((t) => (
             <div
-              key={item.month}
-              className="flex flex-col items-center gap-3"
+              key={t}
+              className="absolute right-2 text-xs text-gray-400"
+              style={{ bottom: `${(t / maxTick) * BAR_MAX_HEIGHT}px` }}
             >
-              {/* Values */}
-              <div className="flex gap-3 text-xs text-gray-700">
-                <span>{item.stockIn}</span>
-                <span>{item.stockOut}</span>
-              </div>
-
-              {/* Bars */}
-              <div className="flex items-end gap-3 h-[180px]">
-                <div
-                  className="w-10 rounded-full bg-[#BBC5FA]"
-                  style={{
-                    height: `${(item.stockIn / MAX_VALUE) * BAR_MAX_HEIGHT}px`,
-                  }}
-                />
-                <div
-                  className="w-10 rounded-full bg-[#F58B59]"
-                  style={{
-                    height: `${(item.stockOut / MAX_VALUE) * BAR_MAX_HEIGHT}px`,
-                  }}
-                />
-              </div>
-
-              {/* Month */}
-              <div className="text-sm text-gray-500 mt-2">
-                {item.month}
-              </div>
+              {t}
             </div>
           ))}
+        </div>
+
+        {/* Chart area */}
+        <div className="relative flex-1 min-w-0">
+          {/* Grid lines */}
+          <div className="absolute left-0 right-0 top-0" style={{ height: BAR_MAX_HEIGHT }}>
+            {ticks.map((t) => (
+              <div
+                key={t}
+                className="absolute left-0 right-0 border-t border-dashed border-gray-200"
+                style={{ bottom: `${(t / maxTick) * BAR_MAX_HEIGHT}px` }}
+              />
+            ))}
+          </div>
+
+          {/* Scroll */}
+          <div className="absolute left-0 right-0 bottom-0 overflow-x-auto overflow-y-hidden pb-3">
+            <div className="inline-flex gap-10 px-4" style={{ minWidth: "max-content" }}>
+              {DEMO_INVENTORY_IN_OUT.map((item) => (
+                <div
+                  key={item.month}
+                  className="flex flex-col items-center shrink-0"
+                  style={{ width: 120 }}
+                >
+                  {/* Values on top */}
+                  <div className="flex gap-3 text-xs text-gray-700 mb-3">
+                    <span>{item.stockIn}</span>
+                    <span>{item.stockOut}</span>
+                  </div>
+
+                  {/* Bars */}
+                  <div className="flex items-end gap-3" style={{ height: BAR_MAX_HEIGHT }}>
+                    <div
+                      className="w-7 rounded-full bg-[#BBC5FA]"
+                      style={{ height: `${heightPx(item.stockIn)}px` }}
+                    />
+                    <div
+                      className="w-7 rounded-full bg-[#F58B59]"
+                      style={{ height: `${heightPx(item.stockOut)}px` }}
+                    />
+                  </div>
+
+                  {/* Month */}
+                  <div className="text-sm text-gray-500 mt-3 whitespace-nowrap">
+                    {item.month}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 px-4 text-xs text-gray-400">
+              Scroll horizontally to view other months
+            </div>
+          </div>
         </div>
       </div>
     </div>

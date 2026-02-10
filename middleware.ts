@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const session = req.cookies.get("dl_session")?.value;
 
-  // ✅ Protect all dashboard routes
+  // Protect all dashboard routes
   if (!session) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";

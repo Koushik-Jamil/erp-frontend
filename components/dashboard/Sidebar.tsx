@@ -12,7 +12,7 @@ import {
   type SidebarRouteItem,
 } from "@/lib/sidebar-routes";
 
-/** ✅ Demo permissions (later will come from session/role API) */
+/** Demo permissions (later will come from session/role API) */
 function useUserPermissions(): Permission[] {
   return [
     "VIEW_DASHBOARD",
@@ -175,7 +175,7 @@ export default function Sidebar() {
                 ? item.subItems!.some((s) => isActivePath(pathname, s.href))
                 : isActivePath(pathname, item.href);
 
-              // ✅ LINK ITEM (no subitems)
+              // LINK ITEM (no subitems)
               if (!isGroup) {
                 return (
                   <Link
@@ -202,7 +202,7 @@ export default function Sidebar() {
                 );
               }
 
-              // ✅ GROUP ITEM (accordion)
+              //  GROUP ITEM (accordion)
               const isOpen = openGroup === item.name;
 
               return (
@@ -210,7 +210,7 @@ export default function Sidebar() {
                   <button
                     type="button"
                     onClick={() => {
-                      // ✅ if collapsed, expand first (better UX)
+                      // if collapsed, expand first (better UX)
                       if (collapsed) setCollapsed(false);
 
                       setOpenGroup((prev) =>
