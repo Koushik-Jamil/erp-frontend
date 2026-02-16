@@ -16,16 +16,16 @@ export default function DashboardLayout({
         </div>
 
         {/* Main area */}
-        <div className="flex-1 min-w-0 h-full overflow-y-auto">
+        <div className="flex-1 min-w-0 h-full overflow-y-auto pt-6">
           {/* Topbar (centered) */}
-          <div className="px-6 pb-6">
-            <div className="max-w-350 mx-auto">
+          <div>
+            <div className="max-w-350 mx-auto px-4">
               <Topbar />
             </div>
           </div>
 
           {/* Page content (FULL WIDTH by default) */}
-          <main className="px-6 pb-6">
+          <main className="p-6">
             {children}
           </main>
         </div>

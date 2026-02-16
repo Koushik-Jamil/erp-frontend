@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { DEMO_USERS } from "@/lib/demo-users";
+import { buildPermissions } from "@/lib/permissions";
 
 type LoginBody = {
   username?: string;
@@ -13,7 +14,6 @@ export async function POST(req: Request) {
     const username = String(body?.username ?? "").trim();
     const password = String(body?.password ?? "");
 
-    //  Basic validation
     if (!username || !password) {
       return NextResponse.json(
         { message: "Username and password are required." },
@@ -21,7 +21,6 @@ export async function POST(req: Request) {
       );
     }
 
-    //  Find user (demo user list)
     const user = DEMO_USERS.find(
       (u) => u.username === username && u.password === password
     );
@@ -33,19 +32,14 @@ export async function POST(req: Request) {
       );
     }
 
-    /**
-     * Session payload (ERP-friendly)
-     * Add more fields later:
-     * - avatarUrl
-     * - departmentId
-     * - permissions array
-     */
+    const permissions = buildPermissions(user.role, user.allow, user.deny);
+
     const sessionPayload = {
       id: user.id,
       name: user.name,
       role: user.role,
       username: user.username,
-      // avatarUrl: "/images/users/default.png", // ✅ future
+      permissions,
     };
 
     const res = NextResponse.json(
@@ -53,14 +47,12 @@ export async function POST(req: Request) {
       { status: 200 }
     );
 
-    // Cookie expiry (ERP standard)
-    // 1 day = 60 * 60 * 24
     res.cookies.set("dl_session", JSON.stringify(sessionPayload), {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24, // 1 day session
+      maxAge: 60 * 60 * 24,
     });
 
     return res;

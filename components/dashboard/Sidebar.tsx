@@ -96,10 +96,10 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="bg-[#F8F8F8] px-2 pt-4 mt-6 ml-4 rounded-2xl shadow-sm">
+    <div className="bg-[#F8F8F8] px-2 pt-4 mt-6 ml-4 rounded-2xl shadow-sm border border-gray-200">
       <aside
         className={[
-          "hidden lg:flex flex-col min-h-screen bg-white border-r border-gray-100",
+          "hidden lg:flex flex-col min-h-[calc(100vh-8vh)] bg-white border-r border-gray-100",
           "transition-all duration-300 ease-in-out",
           collapsed ? "w-[84px]" : "w-[280px]",
         ].join(" ")}
