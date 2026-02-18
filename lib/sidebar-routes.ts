@@ -47,7 +47,7 @@ export type SidebarRouteItem = {
   name: string;
   href?: string;
   icon: LucideIcon;
-  title?: string;            // ✅ added (non-breaking)
+  title?: string;          
   className?: string;
   permission?: Permission[];
   subItems?: SidebarRouteItem[];
@@ -87,28 +87,15 @@ export const sidebar_routes: SidebarRouteItem[] = [
       },
     ],
   },
-
-  {
-    name: "Product",
-    icon: Boxes,
-    permission: ["PRODUCT_VIEW", "PRODUCT_CONFIG"],
-    subItems: [
-      {
+   {
         name: "Product List",
         href: "/products",
         title: "Product List",
         icon: FileText,
         permission: ["PRODUCT_VIEW"],
       },
-      {
-        name: "Product Configuration",
-        href: "/products/config",
-        title: "Product Configuration",
-        icon: PackagePlus,
-        permission: ["PRODUCT_CONFIG"],
-      },
-    ],
-  },
+
+  
 
   {
     name: "Purchase",
@@ -271,6 +258,11 @@ export const sidebar_routes: SidebarRouteItem[] = [
       },
     ],
   },
+   
+
+
+
+
 
   {
     name: "Role back Permission",
