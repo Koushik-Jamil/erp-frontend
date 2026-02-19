@@ -47,17 +47,15 @@ export type SidebarRouteItem = {
   name: string;
   href?: string;
   icon: LucideIcon;
-  title?: string;          
+  title?: string;
   className?: string;
   permission?: Permission[];
   subItems?: SidebarRouteItem[];
 };
 
-/* ----------------------------------
-   Sidebar Routes
------------------------------------ */
 
 export const sidebar_routes: SidebarRouteItem[] = [
+
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -66,6 +64,7 @@ export const sidebar_routes: SidebarRouteItem[] = [
     permission: ["VIEW_DASHBOARD"],
   },
 
+  
   {
     name: "TICKETS",
     icon: PackagePlus,
@@ -87,18 +86,58 @@ export const sidebar_routes: SidebarRouteItem[] = [
       },
     ],
   },
-   {
-        name: "Product List",
-        href: "/products",
-        title: "Product List",
-        icon: FileText,
-        permission: ["PRODUCT_VIEW"],
-      },
-
-  
 
   {
-    name: "Purchase",
+    name: "Product List",
+    href: "/products",
+    title: "Product List",
+    icon: FileText,
+    permission: ["PRODUCT_VIEW"],
+  },
+
+
+  {
+    name: "INVENTORY",
+    icon: PackagePlus,
+    permission: [
+      "INVENTORY_ADD_PRODUCT",
+      "INVENTORY_REQUISITION",
+      "REPORTS_VIEW",
+      "INVENTORY_CONFIG",
+    ],
+    subItems: [
+      {
+        name: "Asset List",
+        href: "/inventory/products",
+        title: "Asset List",
+        icon: FileText,
+        permission: ["INVENTORY_ADD_PRODUCT"],
+      },
+      {
+        name: "Stock Requisition",
+        href: "/inventory/requisitions",
+        title: "Stock Requisition",
+        icon: FileText,
+        permission: ["INVENTORY_REQUISITION"],
+      },
+      {
+        name: "Inventory Transactions",
+        href: "/transactions/stock-in",
+        title: "Inventory Transactions",
+        icon: FileText,
+        permission: [],
+      },
+      {
+        name: "Reports",
+        href: "/reports",
+        title: "Reports",
+        icon: FileText,
+        permission: ["REPORTS_VIEW"],
+      },
+    ],
+  },
+  {
+    name: "PURCHASE",
     icon: ShoppingCart,
     permission: [
       "PURCHASE_VENDOR",
@@ -110,77 +149,39 @@ export const sidebar_routes: SidebarRouteItem[] = [
       {
         name: "Vendor",
         href: "/purchase/vendors",
-        title: "Vendors",
+        title: "Vendor",
         icon: Building2,
         permission: ["PURCHASE_VENDOR"],
       },
       {
-        name: "Purchase Requisitions",
-        href: "/purchase/requisitions", 
-        title: "Requisitions Table – Purchase",
+        name: "Purchase Requisition",
+        href: "/purchase/requisitions",
+        title: "Purchase Requisition",
         icon: FileText,
         permission: ["PURCHASE_REQUISITION"],
       },
       {
         name: "Purchase Order",
         href: "/purchase/order",
-        title: "Purchase Orders",
+        title: "Purchase Order",
         icon: FileText,
         permission: ["PURCHASE_ORDER"],
       },
       {
         name: "Purchase Invoice",
         href: "/purchase/invoice",
-        title: "Purchase Invoices",
+        title: "Purchase Invoice",
         icon: FileText,
         permission: ["PURCHASE_INVOICE"],
       },
     ],
   },
 
-  {
-    name: "Inventory",
-    icon: PackagePlus,
-    permission: [
-      "INVENTORY_ADD_PRODUCT",
-      "INVENTORY_REQUISITION",
-      "REPORTS_VIEW",
-      "INVENTORY_CONFIG",
-    ],
-    subItems: [
-      {
-        name: "Add Product",
-        href: "/inventory/add-product",
-        title: "Add Product – Inventory",
-        icon: PackagePlus,
-        permission: ["INVENTORY_ADD_PRODUCT"],
-      },
-      {
-        name: "Product Requisitions",
-        href: "/inventory/requisitions",
-        title: "Requisitions Table – Inventory",
-        icon: FileText,
-        permission: ["INVENTORY_REQUISITION"],
-      },
-      {
-        name: "Reports",
-        href: "/reports",
-        title: "Reports",
-        icon: FileText,
-        permission: ["REPORTS_VIEW"],
-      },
-      {
-        name: "Inventory Configuration",
-        href: "/inventory/config",
-        title: "Inventory Configuration",
-        icon: GitBranch,
-        permission: ["INVENTORY_CONFIG"],
-      },
-    ],
-  },
+ 
+  
 
   {
-    name: "User",
+    name: "USER",
     icon: Users,
     permission: ["USER_VIEW", "USER_ADD", "USER_CONFIG"],
     subItems: [
@@ -208,10 +209,11 @@ export const sidebar_routes: SidebarRouteItem[] = [
     ],
   },
 
+  
   {
-    name: "Department",
+    name: "DEPARTMENT",
     icon: Building2,
-    permission: ["DEPARTMENT_VIEW", "DEPARTMENT_CONFIG"],
+    permission: ["DEPARTMENT_VIEW"],
     subItems: [
       {
         name: "Department List",
@@ -220,18 +222,13 @@ export const sidebar_routes: SidebarRouteItem[] = [
         icon: Building2,
         permission: ["DEPARTMENT_VIEW"],
       },
-      {
-        name: "Department Configuration",
-        href: "/departments/config",
-        title: "Department Configuration",
-        icon: GitBranch,
-        permission: ["DEPARTMENT_CONFIG"],
-      },
+      
     ],
   },
 
+
   {
-    name: "Process",
+    name: "PROCESS",
     icon: GitBranch,
     permission: ["PROCESS_VIEW", "PROCESS_ADD", "PROCESS_CONFIG"],
     subItems: [
@@ -258,20 +255,73 @@ export const sidebar_routes: SidebarRouteItem[] = [
       },
     ],
   },
-   
 
-
-
-
-
+  
   {
-    name: "Role back Permission",
-    href: "/role-back-permission",
-    title: "Role Back Permission",
+    name: "PERMISSION",
     icon: ShieldCheck,
     permission: ["ROLE_BACK_PERMISSION"],
+   
+    subItems: [
+    
+    ],
   },
 
+  
+  {
+    name: "CONFIGURATION",
+    icon: GitBranch,
+    permission: ["PRODUCT_CONFIG", "PURCHASE_VENDOR", "INVENTORY_CONFIG", "DEPARTMENT_CONFIG", "PROCESS_CONFIG", "USER_CONFIG"],
+    subItems: [
+      {
+        name: "Product Configuration",
+        href: "/products/config",
+        title: "Product Configuration",
+        icon: GitBranch,
+        permission: ["PRODUCT_CONFIG"],
+      },
+      {
+        name: "Vendor Configuration",
+        href: "/purchase/vendors",
+        title: "Vendor Configuration",
+        icon: GitBranch,
+        permission: ["PURCHASE_VENDOR"],
+      },
+      {
+        name: "Inventory Configuration",
+        href: "/inventory/config",
+        title: "Inventory Configuration",
+        icon: GitBranch,
+        permission: ["INVENTORY_CONFIG"],
+      },
+        {
+        name: "User Configuration",
+        href: "/users/config",
+        title: "User Configuration",
+        icon: GitBranch,
+        permission: ["USER_CONFIG"],
+      },
+      {
+        name: "Department Configuration",
+        href: "/departments/config",
+        title: "Department Configuration",
+        icon: GitBranch,
+        permission: ["DEPARTMENT_CONFIG"],
+      },
+        {
+        name: "Process Configuration",
+        href: "/process/config",
+        title: "Process Configuration",
+        icon: GitBranch,
+        permission: ["PROCESS_CONFIG"],
+      },
+    ],
+  },
+
+  
+ 
+
+  
   {
     name: "Logout",
     href: "/logout",

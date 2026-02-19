@@ -24,7 +24,7 @@ export const PAGE_TITLES: PageTitleConfig[] = [
   },
   {
     match: "/inventory/products",
-    title: "Products – Inventory",
+    title: "Asset Table",
   },
   {
     match: "/purchase/order",
