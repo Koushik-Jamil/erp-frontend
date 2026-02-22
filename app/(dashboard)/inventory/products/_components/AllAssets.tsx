@@ -1,7 +1,5 @@
 "use client";
 const AllAssets = () => {
-
-    const toolbarButtons = [];
     return ( <></> );
 }
  

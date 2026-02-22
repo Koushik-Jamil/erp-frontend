@@ -1,4 +1,6 @@
 "use client";
+import { assetToolbarConfig } from "@/lib/toolbar/assetToolbarConfig";
+import AddAsset from "./AddAsset";
 
 import * as React from "react";
 import {
@@ -17,28 +19,13 @@ import {
   ArrowDown,
   ArrowUp,
   ArrowUpDown,
-  Calendar,
-  Columns3,
-  Download,
-  Plus,
-  RotateCcw,
-  SlidersHorizontal,
-  Upload,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
 } from "lucide-react";
 
 import { DEMO_ASSET_ROWS } from "@/lib/demo-assets-table";
 import { assetColumns } from "../_config/columns";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -47,21 +34,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ToolbarItem } from "@/lib/toolbar/types";
+
+
+
 
 export default function AssetTableClient() {
-  'use no memo';
-  
   const data = React.useMemo(() => DEMO_ASSET_ROWS, []);
 
-  // Toolbar state (demo)
-  const [department, setDepartment] = React.useState("All");
-  const [filter, setFilter] = React.useState("All");
+  // Toolbar state (demo) - not used in this simplified client
 
   // TanStack state
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [globalFilter, setGlobalFilter] = React.useState("");
+
+  
+  const [isAddOpen, setIsAddOpen] = React.useState(false);
+
+  // applyColumnFilter was removed; column filtering is handled via table state directly
 
   const table = useReactTable({
     data,
@@ -77,16 +72,32 @@ export default function AssetTableClient() {
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  function resetAll() {
-    setDepartment("All");
-    setFilter("All");
-    setGlobalFilter("");
-    table.resetSorting();
-    table.resetColumnFilters();
-    table.resetColumnVisibility();
-    table.setPageIndex(0);
-    table.setPageSize(15);
-  }
+  // resetAll helper removed — not needed in this view
+
+const getButton = (item: ToolbarItem, i: number) => {
+  const handleClick = () => {
+    // 👇 intercept ONLY add button
+    if (item.id === "add") {
+      setIsAddOpen(true);
+      return;
+    }
+
+    // everything else works as before
+    item.function && item.function(item);
+  };
+
+  return (
+    <Button
+      className={item.className}
+      variant="outline"
+      onClick={handleClick}
+      key={i}
+    >
+      {item.icon}
+      <span className="ml-2">{item.label}</span>
+    </Button>
+  );
+};
 
   return (
     <div className="w-full">
@@ -95,86 +106,12 @@ export default function AssetTableClient() {
         <h1 className="text-3xl font-semibold text-gray-900">Asset Table</h1>
       </div>
 
-      {/* Toolbar */}
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-          <Plus className="w-4 h-4" />
-          Add Asset
-        </Button>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <SelectPill
-            label="Department"
-            value={department}
-            onChange={setDepartment}
-            icon={<SlidersHorizontal className="w-4 h-4" />}
-            options={["All", "IT", "HR", "Accounts", "Store"]}
-          />
-
-          <SelectPill
-            label="Filter"
-            value={filter}
-            onChange={setFilter}
-            icon={<SlidersHorizontal className="w-4 h-4" />}
-            options={["All", "High Priority", "Low Stock", "Newest"]}
-          />
-
-          {/* shadcn Columns dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Columns3 className="w-4 h-4" />
-                Columns
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent className="bg-white" align="end">
-              {table
-                .getAllColumns()
-                .filter((c) => c.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(v) => column.toggleVisibility(!!v)}
-                  >
-                    <span className="capitalize">{column.id}</span>
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button variant="outline" onClick={resetAll}>
-            <RotateCcw className="w-4 h-4" />
-            Reset
-          </Button>
-
-          <Button variant="outline">
-            <Upload className="w-4 h-4" />
-            Import
-          </Button>
-
-          <Button variant="outline">
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
-
-          <Button variant="outline" className="ml-auto">
-            <Calendar className="w-4 h-4 text-blue-600" />
-            Jan 2024 - Feb 2025
-          </Button>
-        </div>
-      </div>
-
-      {/* Search */}
-      <div className="mt-4">
-        <Input
-          value={globalFilter}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalFilter(e.target.value)}
-          placeholder="Search here..."
-          className="w-full md:w-105"
-        />
+      <div className="flex gap-2 mt-4">
+        {assetToolbarConfig.map((item, i) => {
+          const component = getButton(item, i);
+          const hasPermission = true;
+          return hasPermission && component;
+        })}
       </div>
 
       {/* Table Card */}
@@ -184,7 +121,10 @@ export default function AssetTableClient() {
           <Table className="min-w-350">
             <TableHeader>
               {table.getHeaderGroups().map((hg) => (
-                <TableRow key={hg.id} className="bg-[#0B5C8F] hover:bg-[#0B5C8F] border-b-0">
+                <TableRow
+                  key={hg.id}
+                  className="bg-[#0B5C8F] hover:bg-[#0B5C8F] border-b-0"
+                >
                   {hg.headers.map((header, idx) => {
                     const canSort = header.column.getCanSort();
                     const sorted = header.column.getIsSorted();
@@ -198,10 +138,17 @@ export default function AssetTableClient() {
                           idx === hg.headers.length - 1 ? "rounded-tr-xl" : "",
                           canSort ? "cursor-pointer select-none" : "",
                         ].join(" ")}
-                        onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                        onClick={
+                          canSort
+                            ? header.column.getToggleSortingHandler()
+                            : undefined
+                        }
                       >
                         <div className="flex items-center gap-2">
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
 
                           {canSort && (
                             <>
@@ -228,14 +175,20 @@ export default function AssetTableClient() {
                   <TableRow key={row.id} className="hover:bg-gray-50">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={assetColumns.length} className="h-24 text-center text-black">
+                  <TableCell
+                    colSpan={assetColumns.length}
+                    className="h-24 text-center text-black"
+                  >
                     No results.
                   </TableCell>
                 </TableRow>
@@ -247,7 +200,8 @@ export default function AssetTableClient() {
         {/* Pagination Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-gray-100">
           <div className="text-sm text-gray-700">
-            Total {table.getFilteredRowModel().rows.length} | Showing {table.getRowModel().rows.length} Items
+            Total {table.getFilteredRowModel().rows.length} | Showing{" "}
+            {table.getRowModel().rows.length} Items
           </div>
 
           <div className="flex items-center gap-3">
@@ -291,43 +245,20 @@ export default function AssetTableClient() {
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
+              
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-/* small select pill helper */
-function SelectPill({
-  label,
-  value,
-  onChange,
-  icon,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  icon: React.ReactNode;
-  options: string[];
-}) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2">
-      <span className="text-gray-700">{icon}</span>
-      <select
-        className="bg-transparent outline-none text-sm text-black"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-label={label}
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o}
-          </option>
-        ))}
-      </select>
+       {/* Add Asset Modal */}
+      <AddAsset
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSave={(data:unknown) => {
+          console.log("Saved:", data);
+          setIsAddOpen(false);
+        }}
+      />
     </div>
   );
 }
