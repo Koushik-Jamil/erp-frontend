@@ -13,7 +13,9 @@ function PriorityPill({ value }: { value: AssetRow["priority"] }) {
       : "bg-green-50 text-green-600";
 
   return (
-    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium ${cls}`}>
+    <span
+      className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-medium ${cls}`}
+    >
       {value}
     </span>
   );
@@ -55,49 +57,73 @@ function ActionIcon({
 
 export const assetColumns: ColumnDef<AssetRow>[] = [
   { accessorKey: "sl", header: "SL" },
+
   {
     accessorKey: "productId",
-    header: "Product ID",
+    header: "Product Code",
     cell: ({ row }) => (
-      <a className="text-blue-700 hover:underline" href="#">
+      <span className="text-blue-700 hover:underline cursor-pointer">
         {row.original.productId}
-      </a>
+      </span>
     ),
   },
-  { accessorKey: "productName", header: "Product Name" },
+
+  { accessorKey: "productName", header: "Device Type" },
+  { accessorKey: "department", header: "Department" },
+
   { accessorKey: "category", header: "Category" },
   { accessorKey: "subCategory", header: "Sub Category" },
   { accessorKey: "brand", header: "Brand" },
   { accessorKey: "model", header: "Model" },
+
   { accessorKey: "unit", header: "Unit" },
+
   {
     accessorKey: "priority",
     header: "Priority",
     cell: ({ row }) => <PriorityPill value={row.original.priority} />,
   },
+
   { accessorKey: "stock", header: "Stock" },
   { accessorKey: "minStock", header: "Min Stock" },
   { accessorKey: "reorder", header: "Reorder" },
+
   {
     accessorKey: "price",
     header: "Price (৳)",
     cell: ({ row }) => formatBDT(row.original.price),
   },
+
   { accessorKey: "vendor", header: "Vendor" },
   { accessorKey: "createdDate", header: "Created Date" },
+
   {
     id: "action",
     header: "Action",
     enableSorting: false,
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <ActionIcon title="Edit" variant="blue" onClick={() => alert(`Edit ${row.original.productId}`)}>
+        <ActionIcon
+          title="Edit"
+          variant="blue"
+          onClick={() => alert(`Edit ${row.original.productId}`)}
+        >
           <Pencil className="w-4 h-4" />
         </ActionIcon>
-        <ActionIcon title="Duplicate" variant="green" onClick={() => alert(`Duplicate ${row.original.productId}`)}>
+
+        <ActionIcon
+          title="Duplicate"
+          variant="green"
+          onClick={() => alert(`Duplicate ${row.original.productId}`)}
+        >
           <Copy className="w-4 h-4" />
         </ActionIcon>
-        <ActionIcon title="Delete" variant="red" onClick={() => alert(`Delete ${row.original.productId}`)}>
+
+        <ActionIcon
+          title="Delete"
+          variant="red"
+          onClick={() => alert(`Delete ${row.original.productId}`)}
+        >
           <Trash2 className="w-4 h-4" />
         </ActionIcon>
       </div>

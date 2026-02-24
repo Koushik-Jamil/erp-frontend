@@ -1,5 +1,10 @@
-import AssetTableClient from "./_components/AssetTableClient";
+
+import AllAssets from "./_components/AllAssets";
 
 export default function Page() {
-  return <AssetTableClient />;
+  return (
+    <>
+      <AllAssets />
+    </>
+  );
 }

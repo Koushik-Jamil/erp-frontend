@@ -1,4 +1,4 @@
-import * as React from "react";
+
 import {
   Calendar,
   Columns3,
@@ -24,45 +24,6 @@ export const assetToolbarConfig: ToolbarItem[] = [
     permissionsAllowed: ["ASSET_ADD"],  // example permission name
     function: () => alert("Add Asset (demo)"),
   },
-
-  // ✅ Department Select -> applies TanStack column filter
-  // {
-  //   id: "department",
-  //   type: "select",
-  //   label: "Department",
-  //   icon: <SlidersHorizontal className="w-4 h-4" />,
-  //   bind: "department",
-  //   columnId: "category", // CHANGE this to actual column id: "department" or "category"
-  //   clearValue: "All",
-  //   align: "left",
-  // },
-
-  //  Filter Select -> applies TanStack column filter
-  // If you want "High Priority / Low Stock / Newest", those are NOT direct equals filters.
-  // For now, bind it to a simple column like "priority" to make it work.
-  // {
-  //   id: "filter",
-  //   type: "select",
-  //   label: "Filter",
-  //   icon: <SlidersHorizontal className="w-4 h-4" />,
-  //   bind: "filter",
-  //   columnId: "priority", //  CHANGE to real column id
-  //   clearValue: "All",
-  //   align: "left",
-  // },
-
-  // {
-  //   id: "columns",
-  //   type: "columns",
-  //   label: "Columns",
-  //   icon: (
-  //     <>
-  //       <Columns3 className="w-4 h-4" />
-  //       <ChevronDown className="w-4 h-4" />
-  //     </>
-  //   ),
-  //   align: "left",
-  // },
 
   {
     id: "reset",
