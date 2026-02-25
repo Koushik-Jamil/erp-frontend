@@ -1,7 +1,7 @@
 "use client";
 
 import DataTable from "@/components/ui/DataTable";
-import { Plus } from "lucide-react";
+import { Plus, RotateCcw, Download, Upload } from "lucide-react";
 import { assetColumns } from "../_config/columns";
 import { DEMO_ASSET_ROWS, type AssetRow } from "@/lib/demo-assets-table";
 import { ToolbarItem } from "@/lib/toolbar/types";
@@ -11,8 +11,18 @@ import AddAsset, { type AssetFormValues } from "./AddAsset";
 const STORAGE_KEY = "erp_demo_assets_table_v1";
 
 const monthNames = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
 function formatDateForTable(date = new Date()) {
@@ -44,7 +54,8 @@ function getCategoryCode(category?: string) {
 
 function getNextProductId(rows: AssetRow[], category?: string) {
   const code = getCategoryCode(category);
-  const count = rows.filter((r) => r.productId.includes(`PRD-${code}-`)).length + 1;
+  const count =
+    rows.filter((r) => r.productId.includes(`PRD-${code}-`)).length + 1;
   return `PRD-${code}-${String(count).padStart(3, "0")}`;
 }
 
@@ -55,7 +66,10 @@ function toNumber(value?: string) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function mapFormToAssetRow(values: AssetFormValues, existingRows: AssetRow[]): AssetRow {
+function mapFormToAssetRow(
+  values: AssetFormValues,
+  existingRows: AssetRow[],
+): AssetRow {
   const category = values.assetCategory || "General";
   const subCategory = values.assetSubCategory || "General";
   const brand = values.brand || "-";
@@ -72,8 +86,8 @@ function mapFormToAssetRow(values: AssetFormValues, existingRows: AssetRow[]): A
     category === "IT" || subCategory === "Server"
       ? "High"
       : category === "Furniture"
-      ? "Low"
-      : "Medium";
+        ? "Low"
+        : "Medium";
 
   return {
     sl: getNextSl(existingRows),
@@ -94,14 +108,56 @@ function mapFormToAssetRow(values: AssetFormValues, existingRows: AssetRow[]): A
   };
 }
 
+/** Parse "05 Jan 2025" -> Date */
+function parseTableDate(value?: string): Date | null {
+  if (!value) return null;
+
+  const parts = value.trim().split(" ");
+  if (parts.length !== 3) return null;
+
+  const [dd, mmm, yyyy] = parts;
+  const day = Number(dd);
+  const year = Number(yyyy);
+  const monthIndex = monthNames.findIndex(
+    (m) => m.toLowerCase() === mmm.toLowerCase(),
+  );
+
+  if (!Number.isFinite(day) || !Number.isFinite(year) || monthIndex < 0) {
+    return null;
+  }
+
+  const dt = new Date(year, monthIndex, day);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
+function parseInputDate(value?: string) {
+  if (!value) return null; // YYYY-MM-DD
+  const dt = new Date(`${value}T00:00:00`);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
+
 const AllAssets = () => {
   const [openAddAssetModal, setOpenAddAssetModal] = useState(false);
   const [rows, setRows] = useState<AssetRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
 
+  // Toolbar states
+  const [department, setDepartment] = useState("");
+  const [quickFilter, setQuickFilter] = useState("");
+  const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>({
+    from: "",
+    to: "",
+  });
+
   const handleAddButton = () => {
     setOpenAddAssetModal(true);
+  };
+
+  const handleResetToolbar = () => {
+    setDepartment("");
+    setQuickFilter("");
+    setDateRange({ from: "", to: "" });
   };
 
   // Simulated API load (with localStorage fallback)
@@ -150,22 +206,165 @@ const AllAssets = () => {
     });
   };
 
-  const buttons: ToolbarItem[] = useMemo(
-    () => [
-      {
-        id: "add-asset",
-        type: "button",
-        label: "Add Asset",
-        icon: <Plus className="w-4 h-4" />,
-        variant: "default",
-        className: "bg-blue-600 hover:bg-blue-700 text-white",
-        rolesAllowed: ["ADMIN", "MANAGER"],
-        permissionsAllowed: ["ASSET_ADD"],
-        function: () => handleAddButton(),
+  // Apply toolbar filters to demo rows
+  const filteredRows = useMemo(() => {
+    const fromDate = parseInputDate(dateRange.from);
+    const toDate = parseInputDate(dateRange.to);
+
+    return rows.filter((row) => {
+      // Department filter (mapped to category)
+      if (department) {
+        const category = row.category.toLowerCase();
+        const dep = department.toLowerCase();
+
+        const departmentMatched =
+          (dep === "it" && category.includes("it")) ||
+          (dep === "network" && category.includes("network")) ||
+          (dep === "office" && category.includes("office")) ||
+          (dep === "general" && !category);
+
+        if (!departmentMatched) return false;
+      }
+
+      // Quick filter
+      if (quickFilter) {
+        const stock = row.stock ?? 0;
+        const minStock = row.minStock ?? 0;
+        const reorder = row.reorder ?? 0;
+
+        const isOutStock = stock <= 0;
+        const isLowStock = stock > 0 && stock <= Math.max(minStock, reorder);
+        const isInStock = stock > Math.max(minStock, reorder);
+
+        if (quickFilter === "in_stock" && !isInStock) return false;
+        if (quickFilter === "low_stock" && !isLowStock) return false;
+        if (quickFilter === "out_stock" && !isOutStock) return false;
+        if (quickFilter === "high_priority" && row.priority !== "High")
+          return false;
+      }
+
+      // Date range filter (createdDate)
+      if (fromDate || toDate) {
+        const rowDate = parseTableDate(row.createdDate);
+        if (!rowDate) return false;
+
+        if (fromDate && rowDate < fromDate) return false;
+
+        if (toDate) {
+          const endOfDay = new Date(toDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          if (rowDate > endOfDay) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [rows, department, quickFilter, dateRange.from, dateRange.to]);
+
+  const toolbarItems: ToolbarItem[] = [
+    {
+      id: "add-asset",
+      type: "button",
+      label: "Add Asset",
+      icon: <Plus className="w-4 h-4" />,
+      variant: "default",
+      className: "bg-blue-600 hover:bg-blue-700 text-white",
+      rolesAllowed: ["ADMIN", "MANAGER"],
+      permissionsAllowed: ["ASSET_ADD"],
+      function: () => handleAddButton(),
+      position: "left",
+    },
+
+    {
+      id: "department",
+      type: "select",
+      label: "Department",
+      placeholder: "Department",
+      value: department,
+      options: [
+        { label: "IT", value: "IT" },
+        { label: "Network", value: "NETWORK" },
+        { label: "Office", value: "OFFICE" },
+      ],
+      onChange: (value) => setDepartment(value),
+      position: "left",
+    },
+
+    {
+      id: "filter",
+      type: "select",
+      label: "Filter",
+      placeholder: "Filter",
+      value: quickFilter,
+      options: [
+        { label: "In Stock", value: "in_stock" },
+        { label: "Low Stock", value: "low_stock" },
+        { label: "Out of Stock", value: "out_stock" },
+        { label: "High Priority", value: "high_priority" },
+      ],
+      onChange: (value) => setQuickFilter(value),
+      position: "left",
+    },
+
+    {
+      id: "columns",
+      type: "columns",
+      label: "Columns",
+      position: "left",
+    },
+
+    {
+      id: "reset",
+      type: "button",
+      label: "Reset",
+      icon: <RotateCcw className="w-4 h-4" />,
+      variant: "outline",
+      disabled:
+        !department &&
+        !quickFilter &&
+        !dateRange.from &&
+        !dateRange.to,
+      function: () => handleResetToolbar(),
+      position: "left",
+    },
+
+    {
+      id: "import",
+      type: "button",
+      label: "Import",
+      icon: <Upload className="w-4 h-4" />,
+      variant: "outline",
+      function: () => {
+        console.log("Import clicked");
+        // TODO: open import modal / file picker
       },
-    ],
-    [],
-  );
+      position: "left",
+    },
+
+    {
+      id: "export",
+      type: "button",
+      label: "Export",
+      icon: <Download className="w-4 h-4" />,
+      variant: "outline",
+      disabled: filteredRows.length === 0,
+      function: () => {
+        console.log("Export clicked", filteredRows);
+        // TODO: export filteredRows to CSV / Excel
+      },
+      position: "left",
+    },
+
+    {
+      id: "date-range",
+      type: "date-range",
+      label: "Date",
+      from: dateRange.from,
+      to: dateRange.to,
+      onChange: (range) => setDateRange(range),
+      position: "right",
+    },
+  ];
 
   return (
     <>
@@ -174,7 +373,11 @@ const AllAssets = () => {
           <div className="text-sm text-gray-600">Loading assets...</div>
         </div>
       ) : (
-        <DataTable columns={assetColumns} data={rows} toolbarItems={buttons} />
+        <DataTable
+          columns={assetColumns}
+          data={filteredRows}
+          toolbarItems={toolbarItems}
+        />
       )}
 
       <AddAsset

@@ -68,7 +68,9 @@ const DataTable = <T,>({
   return (
     <>
       {/* toolbar */}
-      {toolbarItems && <TableToolbar assetToolbarConfig={toolbarItems || []} />}
+      {toolbarItems && (
+  <TableToolbar assetToolbarConfig={toolbarItems || []} table={table} />
+)}
 
       {/* table */}
       <div className="mt-4 rounded-2xl border border-blue-200 bg-white shadow-sm">
