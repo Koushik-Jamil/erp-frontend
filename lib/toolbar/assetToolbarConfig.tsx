@@ -58,7 +58,7 @@ export const assetToolbarConfig: ToolbarItem[] = [
     
   },
 
-  // ✅ Example: show delete only when selection exists
+  //  Example: show delete only when selection exists
   {
     id: "deleteSelected",
     type: "button",

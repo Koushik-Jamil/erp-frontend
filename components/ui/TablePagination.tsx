@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./button";
+import { Table } from "@tanstack/react-table";
 
-const TablePagination = ({ table }:{table: any}) => {
+const TablePagination = <T,>({ table }: { table: Table<T> }) => {
     return ( <>
      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-gray-100">
           <div className="text-sm text-gray-700">

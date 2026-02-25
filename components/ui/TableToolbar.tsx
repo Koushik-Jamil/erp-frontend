@@ -5,7 +5,7 @@ import { Button } from "./button";
 const TableToolbar = ({
   assetToolbarConfig,
 }: {
-  assetToolbarConfig: any[];
+  assetToolbarConfig: ToolbarItem[];
 }) => {
   const getButton = (item: ToolbarItem, i: number) => {
     const handleClick = () => {
