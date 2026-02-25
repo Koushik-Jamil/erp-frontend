@@ -63,7 +63,7 @@ const AssetSchema = z.object({
   assetStatus:          z.string().optional(),
 });
 
-type AssetFormValues = z.infer<typeof AssetSchema>;
+export type AssetFormValues = z.infer<typeof AssetSchema>;
 type Tab = "asset" | "procurement" | "ownership";
 
 type Props = {
@@ -137,10 +137,14 @@ export default function AddAsset({ open, onClose, onSave }: Props) {
     defaultValues: { assetCategory: "IT", assetSubCategory: "PC" },
   });
 
-  function handleSubmit(data: AssetFormValues) {
-    onSave?.(data);
-    onClose();
-  }
+ function handleSubmit(data: AssetFormValues) {
+  onSave?.(data);
+  form.reset({
+    assetCategory: "IT",
+    assetSubCategory: "PC",
+  });
+  onClose();
+}
 
   if (!open) return null;
 

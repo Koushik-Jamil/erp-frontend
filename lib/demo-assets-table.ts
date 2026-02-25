@@ -9,6 +9,7 @@ export type AssetRow = {
   brand: string;
   model: string;
   unit: string;
+  department?: string;
   priority: AssetPriority;
   stock: number;
   minStock: number;
@@ -33,6 +34,7 @@ export const DEMO_ASSET_ROWS: AssetRow[] = [
     minStock: 10,
     reorder: 15,
     price: 65000,
+    department: "IT",
     vendor: "TechVision",
     createdDate: "05 Jan 2025",
   },
@@ -49,6 +51,7 @@ export const DEMO_ASSET_ROWS: AssetRow[] = [
     stock: 28,
     minStock: 8,
     reorder: 12,
+    department: "IT",
     price: 82000,
     vendor: "SmartTech",
     createdDate: "07 Jan 2025",

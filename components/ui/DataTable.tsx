@@ -1,4 +1,3 @@
-
 "use client";
 import {
   ArrowDown,
@@ -37,10 +36,12 @@ const DataTable = <T,>({
   data,
   columns,
   toolbarItems,
+  onRowClick,
 }: {
   data: T[];
   columns: ColumnDef<T>[];
   toolbarItems?: ToolbarItem[]; // ToolbarItem[]; --- IGNORE ---
+  onRowClick?: (row: T) => void;
 }) => {
   // TanStack state
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -124,10 +125,44 @@ const DataTable = <T,>({
               ))}
             </TableHeader>
 
-            <TableBody>
+            {/* <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow key={row.id} className="hover:bg-gray-50">
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-black"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody> */}
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className={[
+                      "hover:bg-gray-50",
+                      onRowClick ? "cursor-pointer" : "",
+                    ].join(" ")}
+                    onClick={
+                      onRowClick ? () => onRowClick(row.original) : undefined
+                    }
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
                         {flexRender(

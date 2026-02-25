@@ -1,264 +1,189 @@
 "use client";
-import { assetToolbarConfig } from "@/lib/toolbar/assetToolbarConfig";
-import AddAsset from "./AddAsset";
 
-import * as React from "react";
-import {
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnFiltersState,
-  type SortingState,
-  type VisibilityState,
-} from "@tanstack/react-table";
-
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-
-import { DEMO_ASSET_ROWS } from "@/lib/demo-assets-table";
+import DataTable from "@/components/ui/DataTable";
+import { Plus } from "lucide-react";
 import { assetColumns } from "../_config/columns";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { DEMO_ASSET_ROWS, type AssetRow } from "@/lib/demo-assets-table";
 import { ToolbarItem } from "@/lib/toolbar/types";
+import { useEffect, useMemo, useState } from "react";
+import AddAsset, { type AssetFormValues } from "./AddAsset";
 
+const STORAGE_KEY = "erp_demo_assets_table_v1";
 
+const monthNames = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 
+function formatDateForTable(date = new Date()) {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mmm = monthNames[date.getMonth()];
+  const yyyy = date.getFullYear();
+  return `${dd} ${mmm} ${yyyy}`;
+}
 
-export default function AssetTableClient() {
-  const data = React.useMemo(() => DEMO_ASSET_ROWS, []);
+function getNextSl(rows: AssetRow[]) {
+  const maxSl = rows.reduce((max, row) => {
+    const n = Number(row.sl);
+    return Number.isFinite(n) ? Math.max(max, n) : max;
+  }, 0);
 
-  // Toolbar state (demo) - not used in this simplified client
+  return String(maxSl + 1).padStart(3, "0");
+}
 
-  // TanStack state
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = React.useState("");
+function getCategoryCode(category?: string) {
+  const c = (category || "").toLowerCase();
 
-  
-  const [isAddOpen, setIsAddOpen] = React.useState(false);
+  if (c.includes("it")) return "IT";
+  if (c.includes("network")) return "NW";
+  if (c.includes("office")) return "OF";
+  if (c.includes("furniture")) return "FR";
+  if (c.includes("vehicle")) return "VH";
+  return "GEN";
+}
 
-  // applyColumnFilter was removed; column filtering is handled via table state directly
+function getNextProductId(rows: AssetRow[], category?: string) {
+  const code = getCategoryCode(category);
+  const count = rows.filter((r) => r.productId.includes(`PRD-${code}-`)).length + 1;
+  return `PRD-${code}-${String(count).padStart(3, "0")}`;
+}
 
-  const table = useReactTable({
-    data,
-    columns: assetColumns,
-    state: { sorting, columnFilters, columnVisibility, globalFilter },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onColumnVisibilityChange: setColumnVisibility,
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-  });
+function toNumber(value?: string) {
+  if (!value) return 0;
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : 0;
+}
 
-  // resetAll helper removed — not needed in this view
+function mapFormToAssetRow(values: AssetFormValues, existingRows: AssetRow[]): AssetRow {
+  const category = values.assetCategory || "General";
+  const subCategory = values.assetSubCategory || "General";
+  const brand = values.brand || "-";
+  const model = values.model || "-";
 
-const getButton = (item: ToolbarItem, i: number) => {
-  const handleClick = () => {
-    // 👇 intercept ONLY add button
-    if (item.id === "add") {
-      setIsAddOpen(true);
-      return;
-    }
+  const productName =
+    values.deviceType?.trim() ||
+    values.model?.trim() ||
+    values.assetSubCategory?.trim() ||
+    "New Asset";
 
-    // everything else works as before
-    item.function?.(item);
+  // Simple demo priority logic (you can refine later)
+  const priority: AssetRow["priority"] =
+    category === "IT" || subCategory === "Server"
+      ? "High"
+      : category === "Furniture"
+      ? "Low"
+      : "Medium";
+
+  return {
+    sl: getNextSl(existingRows),
+    productId: getNextProductId(existingRows, category),
+    productName,
+    category,
+    subCategory,
+    brand,
+    model,
+    unit: values.unitType || "Pcs",
+    priority,
+    stock: 0,
+    minStock: 0,
+    reorder: 0,
+    price: toNumber(values.purchaseCost),
+    vendor: values.vendorName || "-",
+    createdDate: formatDateForTable(),
+  };
+}
+
+const AllAssets = () => {
+  const [openAddAssetModal, setOpenAddAssetModal] = useState(false);
+  const [rows, setRows] = useState<AssetRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const handleAddButton = () => {
+    setOpenAddAssetModal(true);
   };
 
+  // Simulated API load (with localStorage fallback)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+
+        if (stored) {
+          const parsed = JSON.parse(stored) as AssetRow[];
+          if (Array.isArray(parsed) && parsed.length) {
+            setRows(parsed);
+          } else {
+            setRows(DEMO_ASSET_ROWS);
+          }
+        } else {
+          setRows(DEMO_ASSET_ROWS);
+        }
+      } catch (error) {
+        console.error("Failed to load assets from storage:", error);
+        setRows(DEMO_ASSET_ROWS);
+      } finally {
+        setLoading(false);
+        setIsHydrated(true);
+      }
+    }, 400); // simulate API delay
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Persist demo data locally after initial load
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(rows));
+    } catch (error) {
+      console.error("Failed to save assets to storage:", error);
+    }
+  }, [rows, isHydrated]);
+
+  const handleSaveAsset = (formData: AssetFormValues) => {
+    setRows((prev) => {
+      const newRow = mapFormToAssetRow(formData, prev);
+      // prepend so newest appears on top
+      return [newRow, ...prev];
+    });
+  };
+
+  const buttons: ToolbarItem[] = useMemo(
+    () => [
+      {
+        id: "add-asset",
+        type: "button",
+        label: "Add Asset",
+        icon: <Plus className="w-4 h-4" />,
+        variant: "default",
+        className: "bg-blue-600 hover:bg-blue-700 text-white",
+        rolesAllowed: ["ADMIN", "MANAGER"],
+        permissionsAllowed: ["ASSET_ADD"],
+        function: () => handleAddButton(),
+      },
+    ],
+    [],
+  );
+
   return (
-    <Button
-      className={item.className}
-      variant="outline"
-      onClick={handleClick}
-      key={i}
-    >
-      {item.icon}
-      <span className="ml-2">{item.label}</span>
-    </Button>
+    <>
+      {loading ? (
+        <div className="mt-4 rounded-2xl border border-blue-200 bg-white shadow-sm p-6">
+          <div className="text-sm text-gray-600">Loading assets...</div>
+        </div>
+      ) : (
+        <DataTable columns={assetColumns} data={rows} toolbarItems={buttons} />
+      )}
+
+      <AddAsset
+        open={openAddAssetModal}
+        onClose={() => setOpenAddAssetModal(false)}
+        onSave={handleSaveAsset}
+      />
+    </>
   );
 };
 
-  return (
-    <div className="w-full">
-      {/* Title */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold text-gray-900">Asset Table</h1>
-      </div>
-
-      <div className="flex gap-2 mt-4">
-        {assetToolbarConfig.map((item, i) => {
-          const component = getButton(item, i);
-          const hasPermission = true;
-          return hasPermission && component;
-        })}
-      </div>
-
-      {/* Table Card */}
-      <div className="mt-4 rounded-2xl border border-blue-200 bg-white shadow-sm">
-        <div className="w-full overflow-x-auto">
-          {/* min-w makes horizontal scroll like screenshot */}
-          <Table className="min-w-350">
-            <TableHeader>
-              {table.getHeaderGroups().map((hg) => (
-                <TableRow
-                  key={hg.id}
-                  className="bg-[#0B5C8F] hover:bg-[#0B5C8F] border-b-0"
-                >
-                  {hg.headers.map((header, idx) => {
-                    const canSort = header.column.getCanSort();
-                    const sorted = header.column.getIsSorted();
-
-                    return (
-                      <TableHead
-                        key={header.id}
-                        className={[
-                          "text-white",
-                          idx === 0 ? "rounded-tl-xl" : "",
-                          idx === hg.headers.length - 1 ? "rounded-tr-xl" : "",
-                          canSort ? "cursor-pointer select-none" : "",
-                        ].join(" ")}
-                        onClick={
-                          canSort
-                            ? header.column.getToggleSortingHandler()
-                            : undefined
-                        }
-                      >
-                        <div className="flex items-center gap-2">
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-
-                          {canSort && (
-                            <>
-                              {sorted === "asc" ? (
-                                <ArrowUp className="w-4 h-4" />
-                              ) : sorted === "desc" ? (
-                                <ArrowDown className="w-4 h-4" />
-                              ) : (
-                                <ArrowUpDown className="w-4 h-4 opacity-70" />
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-
-            <TableBody>
-              {table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-gray-50">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={assetColumns.length}
-                    className="h-24 text-center text-black"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Pagination Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t border-gray-100">
-          <div className="text-sm text-gray-700">
-            Total {table.getFilteredRowModel().rows.length} | Showing{" "}
-            {table.getRowModel().rows.length} Items
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-gray-700">
-              <select
-                value={table.getState().pagination.pageSize}
-                onChange={(e) => {
-                  table.setPageSize(Number(e.target.value));
-                  table.setPageIndex(0);
-                }}
-                className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm text-black"
-              >
-                {[10, 15, 20, 50].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              <span>Per page</span>
-            </div>
-
-            <div className="text-sm text-gray-700">
-              Page - {table.getState().pagination.pageIndex + 1}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-              
-            </div>
-          </div>
-        </div>
-      </div>
-       {/* Add Asset Modal */}
-      {/* <AddAsset
-        open={isAddOpen}
-        onClose={() => setIsAddOpen(false)}
-        onSave={(data:unknown) => {
-          console.log("Saved:", data);
-          setIsAddOpen(false);
-        }}
-      /> */}
-    </div>
-  );
-}
+export default AllAssets;
