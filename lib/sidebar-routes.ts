@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
-  Boxes,
   ShoppingCart,
   PackagePlus,
   FileText,
@@ -13,9 +12,8 @@ import {
 } from "lucide-react";
 
 /* ----------------------------------
-   Permissions
+   Permissions (kept for future use)
 ----------------------------------- */
-
 export type Permission =
   | "VIEW_DASHBOARD"
   | "PRODUCT_VIEW"
@@ -42,20 +40,17 @@ export type Permission =
 /* ----------------------------------
    Sidebar Route Type
 ----------------------------------- */
-
 export type SidebarRouteItem = {
   name: string;
   href?: string;
   icon: LucideIcon;
   title?: string;
   className?: string;
-  permission?: Permission[];
+  permission?: Permission[]; // future use
   subItems?: SidebarRouteItem[];
 };
 
-
 export const sidebar_routes: SidebarRouteItem[] = [
-
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -64,7 +59,6 @@ export const sidebar_routes: SidebarRouteItem[] = [
     permission: ["VIEW_DASHBOARD"],
   },
 
-  
   {
     name: "TICKETS",
     icon: PackagePlus,
@@ -94,7 +88,6 @@ export const sidebar_routes: SidebarRouteItem[] = [
     icon: FileText,
     permission: ["PRODUCT_VIEW"],
   },
-
 
   {
     name: "INVENTORY",
@@ -136,6 +129,7 @@ export const sidebar_routes: SidebarRouteItem[] = [
       },
     ],
   },
+
   {
     name: "PURCHASE",
     icon: ShoppingCart,
@@ -177,9 +171,6 @@ export const sidebar_routes: SidebarRouteItem[] = [
     ],
   },
 
- 
-  
-
   {
     name: "USER",
     icon: Users,
@@ -209,11 +200,10 @@ export const sidebar_routes: SidebarRouteItem[] = [
     ],
   },
 
-  
   {
     name: "DEPARTMENT",
     icon: Building2,
-    permission: ["DEPARTMENT_VIEW"],
+    permission: ["DEPARTMENT_VIEW", "DEPARTMENT_CONFIG"],
     subItems: [
       {
         name: "Department List",
@@ -222,10 +212,15 @@ export const sidebar_routes: SidebarRouteItem[] = [
         icon: Building2,
         permission: ["DEPARTMENT_VIEW"],
       },
-      
+      {
+        name: "Department Config",
+        href: "/departments/config",
+        title: "Department Config",
+        icon: GitBranch,
+        permission: ["DEPARTMENT_CONFIG"],
+      },
     ],
   },
-
 
   {
     name: "PROCESS",
@@ -256,22 +251,25 @@ export const sidebar_routes: SidebarRouteItem[] = [
     ],
   },
 
-  
   {
     name: "PERMISSION",
     icon: ShieldCheck,
     permission: ["ROLE_BACK_PERMISSION"],
-   
-    subItems: [
-    
-    ],
+    // keep empty subItems for future
+    subItems: [],
   },
 
-  
   {
     name: "CONFIGURATION",
     icon: GitBranch,
-    permission: ["PRODUCT_CONFIG", "PURCHASE_VENDOR", "INVENTORY_CONFIG", "DEPARTMENT_CONFIG", "PROCESS_CONFIG", "USER_CONFIG"],
+    permission: [
+      "PRODUCT_CONFIG",
+      "PURCHASE_VENDOR",
+      "INVENTORY_CONFIG",
+      "DEPARTMENT_CONFIG",
+      "PROCESS_CONFIG",
+      "USER_CONFIG",
+    ],
     subItems: [
       {
         name: "Product Configuration",
@@ -294,7 +292,7 @@ export const sidebar_routes: SidebarRouteItem[] = [
         icon: GitBranch,
         permission: ["INVENTORY_CONFIG"],
       },
-        {
+      {
         name: "User Configuration",
         href: "/users/config",
         title: "User Configuration",
@@ -308,7 +306,7 @@ export const sidebar_routes: SidebarRouteItem[] = [
         icon: GitBranch,
         permission: ["DEPARTMENT_CONFIG"],
       },
-        {
+      {
         name: "Process Configuration",
         href: "/process/config",
         title: "Process Configuration",
@@ -318,10 +316,6 @@ export const sidebar_routes: SidebarRouteItem[] = [
     ],
   },
 
-  
- 
-
-  
   {
     name: "Logout",
     href: "/logout",
